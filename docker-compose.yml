@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOSTNAME=db
+    # depends_on:
+    #   - db
+    networks:
+      - my-network
+    
+
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - /path/to/db/data:/var/lib/postgresql/data
+    networks:
+      - my-network
+
+
+
+  
+  frontend:
+    build:
+      context: ./SayMyNameProjectFrontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    networks:
+      - my-network
+    # depends_on:
+    #   - app
+  
+networks:
+  my-network:
+    driver: bridge
