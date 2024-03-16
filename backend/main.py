@@ -7,7 +7,7 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-
+from Split_word import Splitword
 from sqlalchemy import exc
 from fastapi.responses import StreamingResponse
 import io
@@ -44,7 +44,7 @@ origins = ["http://localhost.tiangolo.com",
     "http://app:4200",
     "http://192.168.2.72:4200",
     "http://10.28.5.119:4200",
-    "http://10.28.18.215:4200"]
+    "http://10.28.11.29:4200"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -93,9 +93,29 @@ async def tt_speech(details:p_model_type.Post, db: Session= Depends(get_db)):
 
     #logic to get the phonetics from the DB
     phonetics_data = db.query(models.Phonetics).filter(models.Phonetics.names == new_student_details.preferred_name.lower()).all()
-
+    split_first_name = Splitword().seperating_name(first_name=new_dict["preferred_name"])
 
     preferred_phonetics = [x.phonetics for x in phonetics_data]
+
+    for pname in split_first_name:
+        preferred_phonetics.append(pname)
+
+    name_list = new_student_details.preferred_name.lower().split(",")
+    #calling DB to get data
+    results = db.query(models.Votes).filter(models.Votes.name.in_(name_list)).order_by(models.Votes.votes.desc()).limit(3).all()
+
+    ordered_phonetics = []
+
+    for x in results:
+        ordered_phonetics.append(x.phonetic)
+    ordered_phonetics.extend(preferred_phonetics)
+    
+    recommened_phonetics = []
+
+    for x in ordered_phonetics:
+        if x not in recommened_phonetics:
+            recommened_phonetics.append(x)
+
 
     pro_data = {
     "student_id" : new_student_details.student_id,
@@ -105,14 +125,9 @@ async def tt_speech(details:p_model_type.Post, db: Session= Depends(get_db)):
     "preferred_name": new_student_details.preferred_name.lower(),
     "audio_binary": new_student_details.audio_binary,
     "pronoun": new_student_details.pronoun,
-    "phonetics": preferred_phonetics
+    "phonetics": recommened_phonetics
     }
 
-
-    name_list = pro_data["preferred_name"].split(",")
-
-#calling DB to get data
-    results = db.query(models.Votes).filter(models.Votes.name.in_(name_list)).order_by(models.Votes.votes.desc()).limit(3).all()
 
     if len(results) == 0:
         pro_data["data_in_votes_table"] = False
@@ -121,7 +136,7 @@ async def tt_speech(details:p_model_type.Post, db: Session= Depends(get_db)):
 
 
     return {"data": pro_data,
-            "results": results,
+            "results": [],
             "status":'success',
             "message":''}
 
@@ -428,7 +443,6 @@ async def user_feedback(details:p_model_type.userfeedback, db: Session= Depends(
         db.add(new_data)
         db.commit()
     except Exception as e:
-        print(e)
         db.rollback()
         return {"status": "failed",
                 "message": "incorrect details received or feedback for this user is already exist."}
@@ -467,8 +481,11 @@ async def delete_record(student_id: str, db: Session= Depends(get_db)):
 
 @app.get("/getaudiophonetics", status_code=status.HTTP_200_OK)
 async def get_audio(phonetics_name:str, db: Session=Depends(get_db)):
-
-    different_language(text=phonetics_name, lang="en")
+    try:
+        different_language(text=phonetics_name, lang="en")
+    except Exception as e:
+        return{"status": "failed",
+               "message": "Audio services are currently unavailable, please try again later"}
     file_path = f'{phonetics_name}.wav'
     try:
         with open(file_path, "rb") as file:  # Open in binary mode 'rb'
@@ -489,8 +506,11 @@ async def get_audio(phonetics_name:str, db: Session=Depends(get_db)):
 
 @app.get("/getaudio", status_code=status.HTTP_200_OK)
 async def get_audio(preferred_name:str, db: Session=Depends(get_db)):
-
-    different_language(text=preferred_name, lang="en")
+    try:
+        different_language(text=preferred_name, lang="en")
+    except Exception as e:
+        return{"status": "failed",
+               "message": "Audio services are currently unavailable, please try again later"}
     file_path = f'{preferred_name}.wav'
     try:
         with open(file_path, "rb") as file:  
