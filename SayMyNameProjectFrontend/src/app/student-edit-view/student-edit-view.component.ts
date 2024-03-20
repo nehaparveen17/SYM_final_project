@@ -143,7 +143,6 @@ export class StudentEditViewComponent {
           "year": 2023,
           "phonetics_selection": this.edited_phonetics_name || this.phoneticSelection
         }
-        console.log(reqObj)
         this.updateDetails(reqObj);
         break;
       }
@@ -160,8 +159,15 @@ export class StudentEditViewComponent {
       this.update_button_flag = true
     }
     else {
-      emp = value
-      this.update_button_flag = false
+      if(/^[a-zA-Z ]*$/.test(value)) {
+        emp = value
+        this.update_button_flag = false
+      }
+      else {
+        this.displayMessage('First Name can only contain lower and uppercase alphabets including space.', 'ERROR');
+        this.update_button_flag = true
+      }
+      
     }
 
   }
@@ -175,8 +181,14 @@ export class StudentEditViewComponent {
       this.update_button_flag = true
     }
     else {
-      emp = value
-      this.update_button_flag = false
+      if(/^[a-zA-Z ]*$/.test(value)) {
+        emp = value
+        this.update_button_flag = false
+      }
+      else {
+        this.displayMessage('Last Name can only contain lower and uppercase alphabets including space.', 'ERROR');
+        this.update_button_flag = true
+      }
     }
   }
 
@@ -189,8 +201,14 @@ export class StudentEditViewComponent {
       this.update_button_flag = true
     }
     else {
-      emp = value
-      this.update_button_flag = false
+      if(/^[a-zA-Z]*$/.test(value)) {
+        emp = value
+        this.update_button_flag = false
+      }
+      else {
+        this.displayMessage('Preferred Name can only contain lower and uppercase alphabets including space.', 'ERROR');
+        this.update_button_flag = true
+      }
     }
   }
 
@@ -204,16 +222,24 @@ export class StudentEditViewComponent {
       this.play_audio_button_flag = true;
     }
     else {
-      emp = value
-      this.update_button_flag = false;
-      this.play_audio_button_flag = false;
+      if(/^[a-zA-Z -]*$/.test(value)) {
+        emp = value
+        this.update_button_flag = false;
+        this.play_audio_button_flag = false;
+      }
+      else {
+        this.displayMessage('Phonetic Name can only contain lower and uppercase alphabets including space and hyphen.', 'ERROR');
+        this.update_button_flag = true;
+        this.play_audio_button_flag = true;
+      }
+     
     }
     this.get_audio_for_phonetics = value;
   }
 
   playAudio(): void {
     // Append the student name to the API URL as a query parameter
-    const apiUrl = `http://127.0.0.1:8081/getaudio?preferred_name=` + this.get_audio_for_phonetics;
+    const apiUrl = `http://10.28.9.191:8081/getaudio?preferred_name=` + this.get_audio_for_phonetics;
 
     // Send a GET request to your backend API to generate and play the audio
     this.ngxService.start()
@@ -272,7 +298,7 @@ export class StudentEditViewComponent {
 
   private viewDetails = () => {
     this.ngxService.start();
-    this.httpClient.get('http://127.0.0.1:8081/getRecord/?studentID=' + parseInt(this.student_id)).subscribe((data: any) => {
+    this.httpClient.get('http://10.28.9.191:8081/getRecord/?studentID=' + parseInt(this.student_id)).subscribe((data: any) => {
       if (data?.status === "success") {
         this.firstName = data?.results[0]?.first_name;
         this.lastName = data?.results[0]?.last_name;
@@ -294,7 +320,7 @@ export class StudentEditViewComponent {
 
   private updateDetails = (reqObj: any) => {
     this.ngxService.start();
-    this.httpClient.put("http://127.0.0.1:8081/update", reqObj).subscribe((data: any) => {
+    this.httpClient.put("http://10.28.9.191:8081/update", reqObj).subscribe((data: any) => {
       if (data?.status.toLowerCase() === "success") {
         this.ngxService.stop();
         this.displayMessage(data?.message, 'SUCCESS');

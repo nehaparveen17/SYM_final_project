@@ -101,6 +101,7 @@ export class MainComponent {
 
   }
 
+  //detects if the pronoun is changed
   pronounChanged = (event: MatSelectChange) => {
     console.log(event?.value)
     let pronoun = ''
@@ -125,6 +126,7 @@ export class MainComponent {
     });
   }
 
+  //opens the popup for custom pronnoun
   openDialogForPronoun(): void {
     let dialogRef = this.dialog.open(DialogModuleComponent, {
       width: '30%',
@@ -148,6 +150,7 @@ export class MainComponent {
     });
   }
 
+  //detects the input value
   sendTheNewValue(event: any) {
     this.value = event?.target?.value;
     if (this.value !== '' || this.value !== undefined || this.value !== null) {
@@ -164,7 +167,7 @@ export class MainComponent {
 
   playAudio(): void {
     // Append the student name to the API URL as a query parameter
-    const apiUrl = `http://127.0.0.1:8081/getaudio?preferred_name=` + this.get_audio_for_phonetics;
+    const apiUrl = `http://10.28.9.191:8081/getaudio?preferred_name=` + this.get_audio_for_phonetics;
     this.ngxService.start()
     // Send a GET request to your backend API to generate and play the audio
     this.httpClient.get(apiUrl, { responseType: 'blob' })
@@ -195,14 +198,15 @@ export class MainComponent {
         },
 
       );
-    // delete the above
   }
 
+  //detects the change in the radio button when phonetics is changed
   public change = (event: MatRadioChange) => {
     if (event?.value !== null || event?.value !== undefined || event?.value !== '') {
       this.play_audio_button = true;
       this.show_save_button = true
       this.get_audio_for_phonetics = event?.value.toLowerCase();
+      this.edited_phonetics = event?.value;
     }
   }
 
@@ -222,7 +226,7 @@ export class MainComponent {
             if (this.student_ID?.length == 9) {
               if (this.student_pronoun !== '') {
                 if (this.student_Name !== '') {
-                  if (/^[a-zA-Z ]*$/.test(this.student_Name)) {
+                  if (/^[a-zA-Z]*$/.test(this.student_Name)) {
                     if (this.first_name !== '') {
                       if (/^[a-zA-Z ]*$/.test(this.first_name)) {
                         let pronoun = ''
@@ -262,7 +266,7 @@ export class MainComponent {
 
                   }
                   else {
-                    this.displayMessage('Preferred Name can only contain lower and uppercase alphabets including space.', 'ERROR')
+                    this.displayMessage('Preferred Name can only contain lower and uppercase alphabets.', 'ERROR')
                   }
                 }
                 else {
@@ -401,7 +405,7 @@ export class MainComponent {
   // calling the service from the backend to get the required phonetics.
   private getPhonetics = (reqObj: any) => {
     this.ngxService.start();
-    this.httpClient.post('http://127.0.0.1:8081/createpost', reqObj).subscribe((data: any) => {
+    this.httpClient.post('http://10.28.9.191:8081/createpost', reqObj).subscribe((data: any) => {
       let requestedData: any = data
       if (requestedData?.status === "success") {
         this.ngxService.stop();
@@ -441,9 +445,10 @@ export class MainComponent {
     })
   }
 
+  //API to capture user feedback
   private giveUserFeedback = (reqObj: any) => {
     this.ngxService.start();
-    this.httpClient.post('http://127.0.0.1:8081/userfeedback', reqObj).subscribe((data: any) => {
+    this.httpClient.post('http://10.28.9.191:8081/userfeedback', reqObj).subscribe((data: any) => {
       let requestedData: any = data
       if (requestedData?.status === "success") {
         this.ngxService.stop();
@@ -466,10 +471,11 @@ export class MainComponent {
 
   }
 
+  //API to save the phonetics
   private savePhonetics = (reqObj: any) => {
     this.final_phonetics = reqObj?.phonetics_selection
     this.ngxService.start();
-    this.httpClient.post('http://127.0.0.1:8081/selection', reqObj).subscribe((data: any) => {
+    this.httpClient.post('http://10.28.9.191:8081/selection', reqObj).subscribe((data: any) => {
       let requestedData: any = data
       if (requestedData?.status === "success") {
         this.edit_button_flag = true;
@@ -481,7 +487,7 @@ export class MainComponent {
         this.save_button_flag = true;
       }
       else {
-        this.displayMessage('Could not process the request', 'ERROR')
+        this.displayMessage('Unable to process the request. Please try again after sometime.', 'ERROR')
         this.ngxService.stop();
       }
     })
