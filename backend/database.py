@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declarative_base
 import pandas as pd
 import os
+from config import DATA_WAREHOUSING_FILE
 
 # SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:123456@localhost/postgres'
 # # SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:123456@db/postgres'
@@ -21,7 +22,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-df = pd.read_csv("final_phonetics_datav2.csv")
+df = pd.read_csv(DATA_WAREHOUSING_FILE)
 
 try:
     df.to_sql('phonetics_table', engine)

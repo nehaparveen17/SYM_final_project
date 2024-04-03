@@ -234,12 +234,12 @@ export class StudentEditViewComponent {
       }
      
     }
-    this.get_audio_for_phonetics = value;
+    this.get_audio_for_phonetics = value.toLowerCase();
   }
 
   playAudio(): void {
     // Append the student name to the API URL as a query parameter
-    const apiUrl = `http://10.28.9.191:8081/getaudio?preferred_name=` + this.get_audio_for_phonetics;
+    const apiUrl = `http://127.0.01:8081/getaudio?preferred_name=` + this.get_audio_for_phonetics;
 
     // Send a GET request to your backend API to generate and play the audio
     this.ngxService.start()
@@ -298,13 +298,13 @@ export class StudentEditViewComponent {
 
   private viewDetails = () => {
     this.ngxService.start();
-    this.httpClient.get('http://10.28.9.191:8081/getRecord/?studentID=' + parseInt(this.student_id)).subscribe((data: any) => {
+    this.httpClient.get('http://127.0.01:8081/getRecord/?studentID=' + parseInt(this.student_id)).subscribe((data: any) => {
       if (data?.status === "success") {
         this.firstName = data?.results[0]?.first_name;
         this.lastName = data?.results[0]?.last_name;
         this.preferredName = data?.results[0]?.preferred_name;
         this.phoneticSelection = data?.results[0]?.phonetics_selection;
-        this.get_audio_for_phonetics = this.phoneticSelection
+        this.get_audio_for_phonetics = this.phoneticSelection.toLocaleLowerCase()
         this.pronoun = data?.results[0]?.pronoun;
         this.display_content_card = true;
         this.ngxService.stop();
@@ -320,7 +320,7 @@ export class StudentEditViewComponent {
 
   private updateDetails = (reqObj: any) => {
     this.ngxService.start();
-    this.httpClient.put("http://10.28.9.191:8081/update", reqObj).subscribe((data: any) => {
+    this.httpClient.put("http://127.0.01:8081/update", reqObj).subscribe((data: any) => {
       if (data?.status.toLowerCase() === "success") {
         this.ngxService.stop();
         this.displayMessage(data?.message, 'SUCCESS');

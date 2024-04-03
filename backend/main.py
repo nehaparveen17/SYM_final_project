@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI, Depends, HTTPException, status
+from t5_model import T5model
 import uvicorn
 import p_model_type
 from different_languages import different_language
@@ -13,6 +14,7 @@ from fastapi.responses import StreamingResponse
 import io
 import os
 from deletescript import delete_incomplete_records
+from config import FINE_TUNED_MODEL_PATH, FRONT_END_SERVER_IP,FRONT_END_SERVER_PORT
 
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
@@ -45,9 +47,7 @@ origins = ["http://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:4200",
     "http://app:4200",
-    "http://192.168.2.72:4200",
-    "http://10.28.5.119:4200",
-    "http://10.28.9.191:4200",
+    f"http://{FRONT_END_SERVER_IP}:{FRONT_END_SERVER_PORT}",
     ]
 app.add_middleware(
     CORSMiddleware,
@@ -98,9 +98,13 @@ async def tt_speech(details:p_model_type.Post, db: Session= Depends(get_db)):
     #logic to get the phonetics from the DB
     phonetics_data = db.query(models.Phonetics).filter(models.Phonetics.names == new_student_details.preferred_name.lower()).all()
     split_first_name = Splitword().seperating_name(word=new_dict["preferred_name"])
+    ml_prediction = T5model(preferred_name=new_dict["preferred_name"], model_path=FINE_TUNED_MODEL_PATH).predict()
+    print(f"ml_prediction: {ml_prediction}")
+
 
     preferred_phonetics = [x.phonetics for x in phonetics_data]
 
+    preferred_phonetics.append(ml_prediction)
     for pname in split_first_name:
         preferred_phonetics.append(pname)
 
@@ -115,7 +119,6 @@ async def tt_speech(details:p_model_type.Post, db: Session= Depends(get_db)):
     ordered_phonetics.extend(preferred_phonetics)
     
     recommened_phonetics = []
-    print(f"recommended_phonetics: {recommened_phonetics}")
 
     for x in ordered_phonetics:
         if x not in recommened_phonetics:
