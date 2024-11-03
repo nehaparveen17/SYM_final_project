@@ -18,4 +18,9 @@ jobs:
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build Docker Image
+        run: |
+          docker build -t username/frontend-app:latest ./SayMyNameProjectFrontend 
+          docker build -t username/backend-app:latest ./backend
       
