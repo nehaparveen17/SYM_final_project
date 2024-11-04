@@ -25,5 +25,7 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t username/frontend-app:latest ./SayMyNameProjectFrontend 
+          docker push username/frontend-app:latest
           docker build -t username/backend-app:latest ./backend
+          docker push username/backend-app:latest
       
