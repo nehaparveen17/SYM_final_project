@@ -28,7 +28,7 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t username/frontend-app:${{env.TAG }} ./SayMyNameProjectFrontend 
-          docker push username/frontend-app:latest
+          docker push username/frontend-app:${{env.TAG }}
           docker build -t username/backend-app:${{env.TAG }} ./backend
-          docker push username/backend-app:latest
+          docker push username/backend-app:${{env.TAG }}
       
