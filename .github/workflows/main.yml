@@ -17,15 +17,18 @@ jobs:
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
-
         with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
+          username: ${{secrets.DOCKERHUB_USERNAME }}
+          password: ${{secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set the Docker image tag
+        id: vars
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Build Docker Image
         run: |
-          docker build -t username/frontend-app:latest ./SayMyNameProjectFrontend 
+          docker build -t username/frontend-app:${{env.TAG }} ./SayMyNameProjectFrontend 
           docker push username/frontend-app:latest
-          docker build -t username/backend-app:latest ./backend
+          docker build -t username/backend-app:${{env.TAG }} ./backend
           docker push username/backend-app:latest
       
