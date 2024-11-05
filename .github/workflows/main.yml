@@ -41,12 +41,24 @@ jobs:
           docker push ${{secrets.DOCKERHUB_USERNAME }}/frontend-app:${{env.TAG }}
           docker push ${{secrets.DOCKERHUB_USERNAME }}/backend-app:${{env.TAG }}
 
-      - name: Create ECR repository if it doesn't exists
+      - name: Check if frontend-app repository exists
         run: |
-          aws ecr describe-repositories --repository-names frontend-app || \
-          aws ecr create-repository --repository-name frontend-app
-          aws ecr describe-repositories --repository-names backend-app || \
+          aws ecr describe-repositories --repository-names frontend-app || echo "Repository does not exist."
+
+      - name: Create frontend-app repository if not exists
+        if: ${{ failure() }} # Only runs if the previous step failed
+        run: |
+            aws ecr create-repository --repository-name frontend-app
+
+      - name: Check if backend-app repository exists
+        run: |
+          aws ecr describe-repositories --repository-names backend-app || echo "Repository does not exist."
+
+      - name: Create backend-app repository if not exists
+        if: ${{ failure() }} # Only runs if the previous step failed
+        run: |
           aws ecr create-repository --repository-name backend-app
+
       - name: push to AWS ECR
         run: |
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/frontend-app:${{ env.TAG }}
