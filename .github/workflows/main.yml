@@ -41,7 +41,7 @@ jobs:
           docker push ${{secrets.DOCKERHUB_USERNAME }}/frontend-app:${{env.TAG }}
           docker push ${{secrets.DOCKERHUB_USERNAME }}/backend-app:${{env.TAG }}
 
-      - name: Create ECR repository if it doesn't exist
+      - name: Create ECR repository if it doesn't exists
         run: |
           aws ecr describe-repositories --repository-names frontend-app || \
           aws ecr create-repository --repository-name frontend-app
