@@ -45,7 +45,7 @@ jobs:
         run: |
           aws ecr describe-repositories --repository-names frontend-app || echo "Repository does not exist."
 
-      - name: Create frontend-app repository if not exists
+      - name: Create frontend-app repository if not exists.
         if: ${{ failure() }} # Only runs if the previous step failed
         run: |
             aws ecr create-repository --repository-name frontend-app
