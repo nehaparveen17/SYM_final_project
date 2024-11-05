@@ -41,6 +41,12 @@ jobs:
           docker push ${{secrets.DOCKERHUB_USERNAME }}/frontend-app:${{env.TAG }}
           docker push ${{secrets.DOCKERHUB_USERNAME }}/backend-app:${{env.TAG }}
 
+      - name: Using AWS Configure
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
+
       - name: Log in to AWS ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
